@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
+import os
 import django
 
-SCRAPY_SIFO_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRAPY_COSDNA_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.append(os.path.join(SCRAPY_SIFO_BASE_DIR, '..'))
+sys.path.append(os.path.join(SCRAPY_COSDNA_BASE_DIR, '..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'creamy_korean.settings'
 django.setup()
 
+BOT_NAME = 'cosdna_scraper'
 
-BOT_NAME = 'sifo_scraper'
-
-SPIDER_MODULES = ['sifo_scraper.spiders']
-NEWSPIDER_MODULE = 'sifo_scraper.spiders'
+SPIDER_MODULES = ['cosdna_scraper.spiders']
+NEWSPIDER_MODULE = 'cosdna_scraper.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:75.0) Gecko/20100101 Firefox/75.0'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -49,13 +48,13 @@ CONCURRENT_REQUESTS_PER_IP = 1
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'sifo_scraper.middlewares.SifoscraperSpiderMiddleware': 543,
+#    'cosdna_scraper.middlewares.CosdnaScraperSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'sifo_scraper.middlewares.SifoscraperDownloaderMiddleware': 543,
+#    'cosdna_scraper.middlewares.CosdnaScraperDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -67,8 +66,7 @@ CONCURRENT_REQUESTS_PER_IP = 1
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'sifo_scraper.pipelines.DuplicatesFilter': 1,
-    'sifo_scraper.pipelines.SifoModelsPipeline': 300,
+   'cosdna_scraper.pipelines.CosdnaScraperPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -86,11 +84,11 @@ AUTOTHROTTLE_MAX_DELAY = 60
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-# HTTPCACHE_ENABLED = True
-# HTTPCACHE_EXPIRATION_SECS = 0
-# HTTPCACHE_DIR = 'httpcache'
-# HTTPCACHE_IGNORE_HTTP_CODES = []
-# HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+#HTTPCACHE_ENABLED = True
+#HTTPCACHE_EXPIRATION_SECS = 0
+#HTTPCACHE_DIR = 'httpcache'
+#HTTPCACHE_IGNORE_HTTP_CODES = []
+#HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 FEED_EXPORT_ENCODING = 'utf-8'
 
@@ -98,4 +96,3 @@ DOWNLOAD_MAXSIZE = 0
 
 LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
 LOG_LEVEL = 'DEBUG'
-# LOG_FILE = os.path.join(SCRAPY_BASE_DIR, 'sifo.log')

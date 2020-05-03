@@ -10,11 +10,6 @@ from . import sifo_data
 from .. import items
 
 
-def clean_name(name):
-    name = re.sub(r'\([0-9-+. ]{2,}\)', '', re.sub(r'[А-Яа-я-]+', '', name))
-    return name.strip()
-
-
 def is_composition_in_en(composition):
     try:
         lang = langdetect.detect(composition)
@@ -48,13 +43,12 @@ class SifoSpider(scrapy.Spider):
         for word in sifo_data.stopWords:
             if word in name:
                 return
-        item['name'] = clean_name(name)
+        item['name'] = re.sub(r'\s{2,}', '', (re.sub(r'\([0-9-+. ]{2,}\)', '', (re.sub(r'\b[А-Яа-яё-]+\b', '', name))))).strip()
         item['section'] = breadcrumbs[:-1]
         item['brand'] = response.css('[itemprop="brand"]::text').extract_first().strip()
         item['image'] = response.css('.thumbnail img::attr(src)').extract_first()
-
         possible_volume = response.css('.list-unstyled').re(r'\d+\sмл')
-        another_possible_volume = response.css('#tab-description').re(r'\d{1,4}\s\w{1,2}')
+        another_possible_volume = response.css('#tab-description').re(r'\d{1,4}\s\w+\b')
         if possible_volume:
             item['volume'] = possible_volume[0]
         elif another_possible_volume:
@@ -64,6 +58,8 @@ class SifoSpider(scrapy.Spider):
         # composition
         possible_composition = response.css('.ingr::text').extract()
         another_possible_composition = response.css('.Ingr::text').extract()
+        if len(possible_composition) > 1 or len(another_possible_composition) > 1:
+            return
         if possible_composition and is_composition_in_en(possible_composition[0][8:-1]):
             item['composition'] = [re.sub(r'\*+', '', ingr).strip()
                                    for ingr in possible_composition[0][8:-1].lower().split(', ')]
