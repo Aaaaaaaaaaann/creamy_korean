@@ -1,8 +1,8 @@
 .idea
+.vscode
 venv/
 .env
 *.log
 tests.py
 static/
-translations.py
 __pycache__/

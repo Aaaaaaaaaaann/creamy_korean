@@ -14,15 +14,16 @@ class DuplicatesFilter:
         if item['name'] in self.names_seen:
             raise scrapy.exceptions.DropItem(f'Duplicate item found: {item["name"]}')
         self.names_seen.add(item['name'])
+        self.sections.add(item['section'])
         return item
 
-    def close_spider(self, spider):
-        all_products_sifo = ProductInShop.objects.filter(shop_id=1)
-
-        for product in all_products_sifo:
-            if product not in self.names_seen:
-                product.availability = False
-                product.save()
+    # def close_spider(self, spider):
+    #     all_products_sifo = ProductInShop.objects.filter(shop_id=1)
+    #
+    #     for product in all_products_sifo:
+    #         if product not in self.names_seen:
+    #             product.availability = False
+    #             product.save()
 
 
 class SifoModelsPipeline:

@@ -16,7 +16,7 @@ logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file
                     level=logging.WARNING, format='%(message)s')
 
 
-def process_composition(self, instances):
+def process_composition(instances):
     for composition in instances:
         ingrs_ids = []
         ingredients = composition.ingredients
@@ -35,6 +35,6 @@ def process_composition(self, instances):
             else:
                 ingrs_ids.append(substance.pk)
         if len(ingrs_ids) == len(ingredients):
-            Composition.objects.create(product=product, ingredients=ingrs_ids)
+            Composition.objects.update_or_create(product=product, defaults={'ingredients': ingrs_ids})
             composition.processed = True
             composition.save()

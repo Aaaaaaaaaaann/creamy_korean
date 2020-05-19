@@ -97,5 +97,5 @@ FEED_EXPORT_ENCODING = 'utf-8'
 DOWNLOAD_MAXSIZE = 0
 
 LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
-LOG_LEVEL = 'DEBUG'
-# LOG_FILE = os.path.join(SCRAPY_BASE_DIR, 'sifo.log')
+LOG_LEVEL = 'ERROR'
+LOG_FILE = os.path.join(SCRAPY_SIFO_BASE_DIR, 'sifo.log')

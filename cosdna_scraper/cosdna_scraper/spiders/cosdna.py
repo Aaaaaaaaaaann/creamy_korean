@@ -14,10 +14,8 @@ class CosdnaSpider(scrapy.Spider):
         urls = []
         for entry in Product.objects.filter(composition_temp__processed=False):
             self.current_product = entry.name
-            query = ''
-            for word in entry.name.split():
-                query += word + '+'
-            urls.append(f'https://www.cosdna.com/eng/product.php?q={query[:-1]}&sort=featured')
+            query = '+'.join(entry.name.split())
+            urls.append(f'https://www.cosdna.com/eng/product.php?q={query}&sort=featured')
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
