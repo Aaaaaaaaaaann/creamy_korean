@@ -100,3 +100,9 @@ class ProductInShop(models.Model):
     current_price = models.IntegerField(blank=True, null=True)
     link_to_product_page = models.TextField(blank=True, null=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+
+class Price(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='prices')
+    highest = models.IntegerField(blank=True, null=True)
+    lowest = models.IntegerField(blank=True, null=True)

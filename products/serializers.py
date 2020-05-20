@@ -1,9 +1,11 @@
 import datetime
 
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from django.utils import dateparse
 
 from .models import Section, Product, IngredientsGroup, Ingredient, Composition, Shop, ProductInShop
+from creamy_korean.settings import HOST
 
 
 class SectionSerializer(serializers.ModelSerializer):
@@ -31,7 +33,14 @@ class SectionSerializer(serializers.ModelSerializer):
         return all_products
     
     def get_subsections(self, instance):
-        return [child.name for child in Section.objects.filter(parent=instance)]
+        subsections = Section.objects.filter(parent=instance)
+        links = {}
+        for section in subsections:
+            if section.children.first():
+                 links[section.name] = f'{HOST}api/sections/{section.slug}/'
+            else:
+                links[section.name] = f'{HOST}api/products/{section.slug}/'
+        return links
 
 
 class ProductInShopSerializer(serializers.ModelSerializer):
@@ -67,8 +76,8 @@ class ProductDetailSerializer(ProductSerializer):
     def get_full_section(self, instance):
         if instance.section:
             section = Section.objects.filter(pk=instance.section.pk)
-            parent = section.parent
+            parent = section[0].parent
             if parent.parent:
-                return f'{parent.parent.name} — {parent.name} — {section.name}'
+                return f'{parent.parent.name} — {parent.name} — {section[0].name}'
             return f'{parent.name} — {section[0].name}'
         return None
