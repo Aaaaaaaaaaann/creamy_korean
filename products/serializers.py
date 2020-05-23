@@ -3,81 +3,49 @@ import datetime
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from django.utils import dateparse
+import drf_dynamic_fields
 
-from .models import Section, Product, IngredientsGroup, Ingredient, Composition, Shop, ProductInShop
+from .models import Section, Product, IngredientsGroup, Ingredient, Composition, Shop, ProductInShop, Price
 from creamy_korean.settings import HOST
 
 
 class SectionSerializer(serializers.ModelSerializer):
     products_number = serializers.SerializerMethodField('get_products_number')
     subsections = serializers.SerializerMethodField('get_subsections')
-    products_list = serializers.HyperlinkedIdentityField(view_name='products_list', lookup_field='slug')
 
     class Meta:
         model = Section
-        fields = ['name', 'products_number', 'subsections', 'products_list']
+        fields = ['id', 'name', 'products_number', 'subsections']
 
     def get_products_number(self, instance):
-        all_products = 0
-        
-        def collect_products(instance):
-            children = Section.objects.get(pk=instance.pk).children.all()
-            if children:
-                for child in children:
-                    collect_products(child)
-            else:
-                nonlocal all_products
-                all_products += instance.products.filter(composition__isnull=False).count()
-
-        collect_products(instance)
-        return all_products
+        subsections = instance.get_most_nested()
+        return Product.objects.filter(composition__isnull=False, section_id__in=subsections).count()
     
     def get_subsections(self, instance):
-        subsections = Section.objects.filter(parent=instance)
-        links = {}
-        for section in subsections:
-            if section.children.first():
-                 links[section.name] = f'{HOST}api/sections/{section.slug}/'
-            else:
-                links[section.name] = f'{HOST}api/products/{section.slug}/'
-        return links
+        serializer = SectionSerializer(instance.children.all(), many=True)
+        return serializer.data
 
 
 class ProductInShopSerializer(serializers.ModelSerializer):
     shop = serializers.StringRelatedField()
-    last_updated = serializers.SerializerMethodField('get_short_datetime')
 
     class Meta:
         model = ProductInShop
-        fields = ['shop', 'current_price', 'link_to_product_page', 'last_updated']
-    
-    def get_short_datetime(self, instance):
-        last_updated = dateparse.parse_datetime(str(ProductInShop.objects.get(product_id=instance.pk).last_updated))
-        return last_updated.strftime('%d.%m.%Y %H:%M:%S')
+        fields = ['shop', 'availability', 'current_price', 'link_to_product_page', 'last_updated']
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='product_detail')
+class PriceSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Product
-        fields = ['name', 'brand', 'volume', 'image', 'url']
+        model = Price
+        fields = ['highest', 'lowest']
 
 
-class ProductDetailSerializer(ProductSerializer):
-    section = serializers.SerializerMethodField('get_full_section')
+class ProductSerializer(drf_dynamic_fields.DynamicFieldsMixin, serializers.ModelSerializer):
     composition = serializers.StringRelatedField()
+    prices = PriceSerializer(read_only=True)
     available_in_shops = ProductInShopSerializer(many=True)
     
     class Meta:
         model = Product
-        fields = ['name', 'brand', 'volume', 'image', 'section', 'composition', 'available_in_shops']
-
-    def get_full_section(self, instance):
-        if instance.section:
-            section = Section.objects.filter(pk=instance.section.pk)
-            parent = section[0].parent
-            if parent.parent:
-                return f'{parent.parent.name} — {parent.name} — {section[0].name}'
-            return f'{parent.name} — {section[0].name}'
-        return None
+        fields = ['id', 'name', 'brand', 'volume', 'image', 'section_id', 'composition', 'prices', 'available_in_shops']

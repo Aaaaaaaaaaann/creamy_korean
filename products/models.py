@@ -9,18 +9,24 @@ from extras.translations import translate_and_slugify
 class Section(models.Model):
     name = models.CharField(max_length=30)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, blank=True, null=True, related_name='children')
-    slug = models.TextField(unique=True, blank=True, null=True)
  
     def __str__(self):
         return self.name
+    
+    def get_most_nested(self):
+        subsections = set()
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = translate_and_slugify(self.name)
-            if self.parent:
-                self.slug = self.parent.slug + '/' + self.slug
-        super().save(*args, **kwargs)
+        def get_children(instance):
+            nested_sections = instance.children.all()
+            if nested_sections:
+                for section in nested_sections:
+                    get_children(section)
+            else:
+                nonlocal subsections
+                subsections.add(instance.pk)
 
+        get_children(self)
+        return subsections
 
 class Product(models.Model):
     name = models.TextField(unique=True)
@@ -28,15 +34,9 @@ class Product(models.Model):
     volume = models.TextField(blank=True, null=True)
     image = models.TextField(blank=True, null=True)
     section = models.ForeignKey(Section, on_delete=models.PROTECT, blank=True, null=True, related_name='products')
-    slug = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
 
 
 class SectionTemp(models.Model):

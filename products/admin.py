@@ -11,7 +11,7 @@ class SectionInline(admin.TabularInline):
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'parent', 'slug')
+    list_display = ('id', 'name', 'parent',)
     list_filter = ('parent',)
     ordering = ('parent',)
     inlines = (SectionInline,)

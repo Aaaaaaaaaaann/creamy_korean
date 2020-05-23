@@ -1,35 +1,31 @@
 from rest_framework import generics
+from rest_framework import pagination
 
 from .models import Product, Section
-from .serializers import ProductSerializer, ProductDetailSerializer, SectionSerializer
-
-
-class SectionListView(generics.ListAPIView):
-    queryset = Section.objects.filter(parent__isnull=True)
-    serializer_class = SectionSerializer
-
-
-class SubsectionListView(generics.ListAPIView):
-    serializer_class = SectionSerializer
-
-    def get_queryset(self):
-        return Section.objects.filter(parent__slug=self.kwargs['slug'])
+from .serializers import ProductSerializer, SectionSerializer
 
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
-        section = Section.objects.get(slug=self.kwargs['slug'])
-        slugs = [section.slug]
-        subsections = section.children.all()
-        for instance in subsections:
-            slugs.append(instance.slug)
-            for entry in instance.children.all():
-                slugs.append(entry.slug)
-        return Product.objects.filter(composition__isnull=False, section__slug__in=slugs)
+        section = self.kwargs['pk']
+        if section:
+            subsections = Section.objects.get(pk=section).get_most_nested()
+            return Product.objects.filter(composition__isnull=False, section_id__in=subsections)
+        return Product.objects.filter(composition__isnull=False)
 
 
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(composition__isnull=False)
-    serializer_class = ProductDetailSerializer
+    serializer_class = ProductSerializer
+
+
+class SectionListView(generics.ListAPIView):
+    queryset = Section.objects.filter(parent=None)
+    serializer_class = SectionSerializer
+
+
+class SectionDetailView(generics.RetrieveAPIView):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer

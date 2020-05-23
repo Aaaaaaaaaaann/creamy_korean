@@ -5,5 +5,5 @@ from products import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('products.urls')),
+    path('v1/api/', include('products.urls')),
 ]

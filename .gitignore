@@ -6,3 +6,4 @@ venv/
 tests.py
 static/
 __pycache__/
+todo
