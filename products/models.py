@@ -1,9 +1,7 @@
+from collections.abc import Sequence
+
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.utils.text import slugify
-from django.urls import reverse
-
-from extras.translations import translate_and_slugify
 
 
 class Section(models.Model):
@@ -28,12 +26,37 @@ class Section(models.Model):
         get_children(self)
         return subsections
 
+
+class ProductQuerySet(models.QuerySet):
+
+    def with_composition(self):
+        return self.filter(composition__isnull=False)
+
+    def exclude_all(self, ingrs_ids):
+        if isinstance(ingrs_ids, Sequence):
+            return self.exclude(composition__ingredients__contains=ingrs_ids)
+        return self.exclude(composition__ingredients__contains=[ingrs_ids])
+    
+    def include_all(self, ingrs_ids):
+        if isinstance(ingrs_ids, Sequence):
+            return self.filter(composition__ingredients__contains=ingrs_ids)
+        return self.filter(composition__ingredients__contains=[ingrs_ids])
+    
+    def include_any(self, ingrs_ids):
+        if isinstance(ingrs_ids, Sequence):
+            return self.filter(composition__ingredients__overlap=ingrs_ids)
+        return self.filter(composition__ingredients__overlap=[ingrs_ids])
+
+
 class Product(models.Model):
     name = models.TextField(unique=True)
     brand = models.TextField()
     volume = models.TextField(blank=True, null=True)
     image = models.TextField(blank=True, null=True)
     section = models.ForeignKey(Section, on_delete=models.PROTECT, blank=True, null=True, related_name='products')
+
+    objects = models.Manager()
+    search = ProductQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -65,6 +88,9 @@ class Ingredient(models.Model):
     function = models.TextField(blank=True, null=True)
     group = models.ForeignKey(IngredientsGroup, on_delete=models.DO_NOTHING, blank=True, null=True,
                               related_name='ingredients')
+    
+    def __str__(self):
+        return self.name
 
 
 class Composition(models.Model):

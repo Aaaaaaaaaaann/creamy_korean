@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-
 import scrapy
 from products.models import Product, Ingredient, Composition, CompositionTemp, SectionTemp, ProductInShop
 from extras.composition_processing import process_composition

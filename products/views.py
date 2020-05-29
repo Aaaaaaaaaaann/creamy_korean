@@ -1,23 +1,27 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework import pagination
 
-from .models import Product, Section
-from .serializers import ProductSerializer, SectionSerializer
+from .filters import ProductFilter
+from .models import Product, Section, IngredientsGroup
+from .serializers import ProductSerializer, SectionSerializer, IngredientsGroupSerializer
 
 
 class ProductListView(generics.ListAPIView):
+    queryset = Product.search.with_composition()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProductFilter
 
-    def get_queryset(self):
-        section = self.kwargs['pk']
-        if section:
-            subsections = Section.objects.get(pk=section).get_most_nested()
-            return Product.objects.filter(composition__isnull=False, section_id__in=subsections)
-        return Product.objects.filter(composition__isnull=False)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        fields = self.request.query_params.get('fields', None)
+        if fields:
+            context['fields'] = fields.split(',')
+        return context
 
 
 class ProductDetailView(generics.RetrieveAPIView):
-    queryset = Product.objects.filter(composition__isnull=False)
+    queryset = Product.search.with_composition()
     serializer_class = ProductSerializer
 
 
@@ -26,6 +30,6 @@ class SectionListView(generics.ListAPIView):
     serializer_class = SectionSerializer
 
 
-class SectionDetailView(generics.RetrieveAPIView):
-    queryset = Section.objects.all()
-    serializer_class = SectionSerializer
+class IngredientsGroupView(generics.ListAPIView):
+    serializer_class = IngredientsGroupSerializer
+    queryset = IngredientsGroup.objects.all()
