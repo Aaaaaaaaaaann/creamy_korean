@@ -3,7 +3,7 @@
 venv/
 .env
 *.log
-tests.py
 static/
 __pycache__/
 todo
+celerybeat-schedule

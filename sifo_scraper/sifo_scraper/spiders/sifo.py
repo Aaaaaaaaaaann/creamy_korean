@@ -28,7 +28,7 @@ class SifoSpider(scrapy.Spider):
     start_urls = sifo_data.urls
 
     def parse(self, response):
-        products_links = response.css('.product-meta a::attr(href)').getall()
+        products_links = response.css('.product-item a::attr(href)').getall()
         yield from response.follow_all(products_links, callback=self.parse_product_detail)
 
         pagination_links = response.css('.pagination a::attr(href)').getall()
@@ -37,27 +37,31 @@ class SifoSpider(scrapy.Spider):
 
     def parse_product_detail(self, response):
         item = items.SifoItem()
+
         # product
-        breadcrumbs = response.css('.breadcrumb-links a::text').extract()
-        name = breadcrumbs[-1]
-        for word in sifo_data.stopWords:
-            if word in name:
+        title = response.css('h1::text').extract()
+        for word in sifo_data.stop_words:
+            if title[0].lower().find(word) >= 0:
                 return
-        item['name'] = re.sub(r'\s{2,}', '', (re.sub(r'\([0-9-+. ]{2,}\)', '', (re.sub(r'\b[А-Яа-яё-]+\b', '', name))))).strip()
-        item['section'] = breadcrumbs[:-1]
+
+        item['name'] = re.sub(r'\s{2,}', '', (re.sub(r'\([0-9-+. ]{2,}\)', '', (re.sub(r'\b[А-Яа-яё-]+\b', '', title[0]))))).strip()
+        item['section'] = re.search(r'[А-Яа-яё- ]+', title[0]).group(0).strip()
         item['brand'] = response.css('[itemprop="brand"]::text').extract_first().strip()
         item['image'] = response.css('.thumbnail img::attr(src)').extract_first()
-        possible_volume = response.css('.list-unstyled').re(r'\d+\sмл')
+        possible_volume = response.css('#product').re(r'(Объем:\s)(\d+\s\w+)')
         another_possible_volume = response.css('#tab-description').re(r'\d{1,4}\s\w+\b')
         if possible_volume:
-            item['volume'] = possible_volume[0]
+            item['volume'] = possible_volume[1]
         elif another_possible_volume:
             item['volume'] = another_possible_volume[0]
         else:
             item['volume'] = None
+
         # composition
         possible_composition = response.css('.ingr::text').extract()
         another_possible_composition = response.css('.Ingr::text').extract()
+
+        # If there are compositions for a few products on the one page, don't process them.
         if len(possible_composition) > 1 or len(another_possible_composition) > 1:
             return
         if possible_composition and is_composition_in_en(possible_composition[0][8:-1]):
@@ -68,7 +72,9 @@ class SifoSpider(scrapy.Spider):
                                    for ingr in another_possible_composition[0][8:-1].lower().split(', ')]
         else:
             item['composition'] = None
+            
         # shop
         item['current_price'] = int(response.css('.price-new').re(r'\d+')[0])
         item['link_to_product_page'] = response.request.url
+
         yield item

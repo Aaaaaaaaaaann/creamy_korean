@@ -1,7 +1,15 @@
 from collections.abc import Sequence
 
 from django.db import models
+from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
+    favourite_products = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
+    exclude_ingrs = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
+    include_ingrs = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
 
 
 class Section(models.Model):
@@ -64,7 +72,7 @@ class Product(models.Model):
 
 class SectionTemp(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='section_temp')
-    section = ArrayField(models.CharField(max_length=25), blank=True, null=True)
+    section = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.section
@@ -76,16 +84,15 @@ class IngredientsGroup(models.Model):
         UNDESIRABLE = 'нежелательные'
         ACTIVE = 'активные'
 
-    name = models.TextField(unique=True)
+    groupname = models.TextField(unique=True)
     kind = models.CharField(max_length=50, choices=Kind.choices, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.groupname
 
 
 class Ingredient(models.Model):
     name = models.TextField(unique=True)
-    function = models.TextField(blank=True, null=True)
     group = models.ForeignKey(IngredientsGroup, on_delete=models.DO_NOTHING, blank=True, null=True,
                               related_name='ingredients')
     
@@ -98,7 +105,7 @@ class Composition(models.Model):
     ingredients = ArrayField(models.IntegerField(), blank=True, null=True)
 
     def __str__(self):
-        return ', '.join([Ingredient.objects.get(pk=ingr).name for ingr in self.ingredients])
+        return [Ingredient.objects.get(pk=ingr).name for ingr in self.ingredients]
 
 
 class CompositionTemp(models.Model):

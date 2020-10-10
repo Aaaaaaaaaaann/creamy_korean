@@ -31,7 +31,7 @@ ROBOTSTXT_OBEY = False
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 5
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 1
 CONCURRENT_REQUESTS_PER_IP = 1
 
 # Disable cookies (enabled by default)
@@ -86,7 +86,7 @@ AUTOTHROTTLE_MAX_DELAY = 60
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-# HTTPCACHE_ENABLED = True
+# HTTPCACHE_ENABLED = False
 # HTTPCACHE_EXPIRATION_SECS = 0
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
@@ -96,6 +96,6 @@ FEED_EXPORT_ENCODING = 'utf-8'
 
 DOWNLOAD_MAXSIZE = 0
 
-LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
-LOG_LEVEL = 'ERROR'
-LOG_FILE = os.path.join(SCRAPY_SIFO_BASE_DIR, 'sifo.log')
+# LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+# LOG_LEVEL = 'ERROR'
+# LOG_FILE = os.path.join(SCRAPY_SIFO_BASE_DIR, 'sifo.log')

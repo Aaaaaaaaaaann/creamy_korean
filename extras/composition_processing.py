@@ -4,7 +4,7 @@ import logging
 import sys
 import django
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.'))
+sys.path.append(os.path.join(os.getcwd(), '.'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'creamy_korean.settings'
 django.setup()
 
@@ -12,7 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from products.models import Ingredient, Composition
 
-logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ingredients.log'), filemode='a',
+logging.basicConfig(filename=os.path.join(os.getcwd(), 'ingredients.log'), filemode='a',
                     level=logging.WARNING, format='%(message)s')
 
 

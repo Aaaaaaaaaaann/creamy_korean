@@ -20,14 +20,14 @@ class SectionAdmin(admin.ModelAdmin):
 
 class IngredientInline(admin.TabularInline):
     model = Ingredient
-    fields = ('name', 'function')
+    fields = ('name', 'group')
     can_delete = False
 
 
 @admin.register(IngredientsGroup)
 class IngredientsGroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'kind')
-    list_filter = ('name', 'kind')
+    list_display = ('groupname', 'kind')
+    list_filter = ('groupname', 'kind')
     inlines = (IngredientInline,)
 
 

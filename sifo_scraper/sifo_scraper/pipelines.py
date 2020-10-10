@@ -11,7 +11,6 @@ class DuplicatesFilter:
         if item['name'] in self.names_seen:
             raise scrapy.exceptions.DropItem(f'Duplicate item found: {item["name"]}')
         self.names_seen.add(item['name'])
-        self.sections.add(item['section'])
         return item
 
     # def close_spider(self, spider):
