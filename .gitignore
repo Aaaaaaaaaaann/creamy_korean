@@ -1,5 +1,5 @@
-.idea
-.vscode
+.idea/
+.vscode/
 venv/
 .env
 *.log
@@ -7,3 +7,6 @@ static/
 __pycache__/
 todo
 celerybeat-schedule
+*_cache
+fixtures/
+tests/

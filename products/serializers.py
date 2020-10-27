@@ -1,19 +1,18 @@
-import datetime
-
-from django.utils import dateparse
 from rest_framework import serializers
 
-from .models import Section, Product, IngredientsGroup, Ingredient, Composition, Shop, ProductInShop, Price
+from .models import Section, Product, IngredientsGroup, Ingredient, ProductInShop, Price
 
 
 class DynamicFieldsSerializer(serializers.ModelSerializer):
 
-      def __init__(self, *args, **kwargs):
-          query_fields = kwargs['context'].pop('fields', None)
-          super().__init__(*args, **kwargs)
-          if query_fields:
-              for field in set(self.fields) - set(query_fields):
-                  self.fields.pop(field)
+    def __init__(self, *args, **kwargs):
+        context = kwargs.get('context', None)
+        if context:
+            query_fields = context.pop('fields', None)
+            super().__init__(*args, **kwargs)
+            if query_fields:
+                for field in set(self.fields) - set(query_fields):
+                    self.fields.pop(field)
 
 
 class SectionSerializer(serializers.ModelSerializer):
@@ -33,6 +32,13 @@ class SectionSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class CompositionSerializer(serializers.RelatedField):
+
+    def to_representation(self, instance):
+        ingredients = instance.ingredients
+        return ', '.join(Ingredient.objects.get(pk=ingr).name for ingr in ingredients)
+
+
 class ProductInShopSerializer(serializers.ModelSerializer):
     shop = serializers.StringRelatedField()
 
@@ -49,7 +55,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(DynamicFieldsSerializer):
-    composition = serializers.StringRelatedField()
+    composition = CompositionSerializer(read_only=True)
     prices = PriceSerializer(read_only=True)
     available_in_shops = ProductInShopSerializer(many=True)
     

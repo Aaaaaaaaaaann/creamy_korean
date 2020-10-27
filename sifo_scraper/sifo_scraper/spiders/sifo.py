@@ -10,7 +10,7 @@ from . import sifo_data
 from .. import items
 
 
-def is_composition_in_en(composition):
+def is_in_eng(composition):
     try:
         lang = langdetect.detect(composition)
     except LangDetectException:
@@ -38,13 +38,26 @@ class SifoSpider(scrapy.Spider):
     def parse_product_detail(self, response):
         item = items.SifoItem()
 
-        # product
+        # Check for stop words in a title.
         title = response.css('h1::text').extract()
         for word in sifo_data.stop_words:
             if title[0].lower().find(word) >= 0:
                 return
-
-        item['name'] = re.sub(r'\s{2,}', '', (re.sub(r'\([0-9-+. ]{2,}\)', '', (re.sub(r'\b[А-Яа-яё-]+\b', '', title[0]))))).strip()
+        
+        # composition
+        possible_composition = response.css('.ingr::text').extract()
+        another_possible_composition = response.css('.Ingr::text').extract()
+        # If there are compositions for a few products on the one page, don't process them.
+        if len(possible_composition) > 1 or len(another_possible_composition) > 1:
+            return
+        composition = possible_composition or another_possible_composition or None
+        if composition and is_in_eng(composition):
+            item['composition'] = [re.sub(r'\*+', '', ingr).strip() 
+                                   for ingr in composition.removeprefix('Состав: ').lower().split(', ')]
+        
+        # product data
+        item['name'] = re.sub(r'\s{2,}', '', (re.sub(r'\([0-9-+. ]{2,}\)', '',
+                             (re.sub(r'\b[А-Яа-яё-]+\b', '', title[0]))))).strip()
         item['section'] = re.search(r'[А-Яа-яё- ]+', title[0]).group(0).strip()
         item['brand'] = response.css('[itemprop="brand"]::text').extract_first().strip()
         item['image'] = response.css('.thumbnail img::attr(src)').extract_first()
@@ -56,22 +69,6 @@ class SifoSpider(scrapy.Spider):
             item['volume'] = another_possible_volume[0]
         else:
             item['volume'] = None
-
-        # composition
-        possible_composition = response.css('.ingr::text').extract()
-        another_possible_composition = response.css('.Ingr::text').extract()
-
-        # If there are compositions for a few products on the one page, don't process them.
-        if len(possible_composition) > 1 or len(another_possible_composition) > 1:
-            return
-        if possible_composition and is_composition_in_en(possible_composition[0][8:-1]):
-            item['composition'] = [re.sub(r'\*+', '', ingr).strip()
-                                   for ingr in possible_composition[0][8:-1].lower().split(', ')]
-        elif another_possible_composition and is_composition_in_en(another_possible_composition[0][8:-1]):
-            item['composition'] = [re.sub(r'\*+', '', ingr).strip()
-                                   for ingr in another_possible_composition[0][8:-1].lower().split(', ')]
-        else:
-            item['composition'] = None
             
         # shop
         item['current_price'] = int(response.css('.price-new').re(r'\d+')[0])

@@ -1,6 +1,7 @@
 import scrapy
-from products.models import Product, Ingredient, Composition, CompositionTemp, SectionTemp, ProductInShop
-from extras.composition_processing import process_composition
+
+from products.models import Product, Composition, CompositionTemp, SectionTemp, ProductInShop
+from extras.composition import process_composition
 
 
 class DuplicatesFilter:

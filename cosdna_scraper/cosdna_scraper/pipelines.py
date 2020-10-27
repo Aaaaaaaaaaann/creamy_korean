@@ -1,5 +1,5 @@
-from products.models import Ingredient, Product, Composition, CompositionTemp
-from extras.composition_processing import process_composition
+from products.models import Product, CompositionTemp
+from extras.composition import process_composition
 
 
 class CosdnaScraperPipeline(object):

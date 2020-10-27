@@ -1,19 +1,16 @@
 import re
 import os
 import logging
-import sys
-import django
-
-sys.path.append(os.path.join(os.getcwd(), '.'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'creamy_korean.settings'
-django.setup()
+import logging.config
 
 from django.core.exceptions import ObjectDoesNotExist
 
 from products.models import Ingredient, Composition
 
-logging.basicConfig(filename=os.path.join(os.getcwd(), 'ingredients.log'), filemode='a',
-                    level=logging.WARNING, format='%(message)s')
+logger = logging.getLogger(__name__)
+fh = logging.FileHandler(os.path.join(os.getcwd(), 'ingredients.log'))
+fh.setLevel(logging.WARNING)
+logger.addHandler(fh)
 
 
 def process_composition(instances):

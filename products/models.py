@@ -79,13 +79,7 @@ class SectionTemp(models.Model):
 
 
 class IngredientsGroup(models.Model):
-
-    class Kind(models.TextChoices):
-        UNDESIRABLE = 'нежелательные'
-        ACTIVE = 'активные'
-
     groupname = models.TextField(unique=True)
-    kind = models.CharField(max_length=50, choices=Kind.choices, blank=True, null=True)
 
     def __str__(self):
         return self.groupname
@@ -103,9 +97,6 @@ class Ingredient(models.Model):
 class Composition(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='composition')
     ingredients = ArrayField(models.IntegerField(), blank=True, null=True)
-
-    def __str__(self):
-        return [Ingredient.objects.get(pk=ingr).name for ingr in self.ingredients]
 
 
 class CompositionTemp(models.Model):
