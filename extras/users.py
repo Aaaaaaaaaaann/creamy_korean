@@ -2,9 +2,17 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class ProfileHandler:
+    """
+    A class contain methods for checking and updating
+    entries values of UserProfile model.
+    """
 
     @staticmethod
     def existing(model, ids):
+        """
+        Get a sequence of IDs and return those of them
+        that exist in the database.
+        """
         output = []
         for i in ids:
             try:
@@ -18,6 +26,10 @@ class ProfileHandler:
 
     @staticmethod
     def make_action(context, field, model):
+        """
+        Change values in database field array
+        based on request context.
+        """
         action = context['action']
         values = context['values']
 
@@ -41,3 +53,16 @@ class ProfileHandler:
                     field.remove(value)
                 except KeyError:
                     continue
+    
+    @staticmethod
+    def get_values(field, model):
+        """Return names of related field values as strings."""
+        if not field:
+            return
+        output = []
+        for value in field:
+            output.append({
+                'id': value,
+                'name': model.objects.get(pk=value).name
+            })
+        return output

@@ -10,6 +10,19 @@ This is a training project, so none of the further URLs are actually available.
 https://creamykorean.ru/v1/api/
 ```
 
+## Content
+[Products](#products)
+* [Fields](#fields)
+* [Filtering](#filtering)
+ 
+[Sections](#sections)
+[Users](#users)
+* [Favourite products](#favourite-products)
+* [Ingredients lists](#ingredients-lists)
+ 
+[Pagination](#pagination)
+
+
 ## Products
 
 ```
@@ -251,51 +264,13 @@ All data must be validated before making a request (an email seems to be an emai
 GET /users/{id}
 ```
 
-Return user data.
+Return user's authentication data.
 
 ```
 {
     "id": 3,
     "username": "testuser1",
-    "email": "znegrosilva87j@amazonshopbuy.com",
-    "profile": {
-        "favourite_products": [
-            {
-                "id": 102,
-                "name": "Royal Skin Cactus Soothing Gel"
-            },
-            {
-                "id": 167,
-                "name": "Ciracle Pore Control Blackhead Off Sheet"
-            }
-        ],
-        "exclude_ingrs": [
-            {
-                "id": 2664,
-                "name": "Sodium Laureth Sulfate"
-            },
-            {
-                "id": 2757,
-                "name": "Sodium Lauryl Sulfate"
-            }
-        ],
-        "include_ingrs": [
-            {
-                "id": 3003,
-                "name": "Tocopherol"
-            },
-            {
-                "id": 2213,
-                "name": "Cetearyl Alcohol"
-            },
-            {
-                "id": 2214,
-                "name": "Cetyl Alcohol"
-            }
-        ],
-        "exclude_ingrs_groups": null,
-        "include_ingrs_groups": null
-    }
+    "email": "znegrosilva87j@amazonshopbuy.com"
 }
 ```
 
@@ -303,28 +278,112 @@ Return user data.
 PATCH /users/{id}
 ```
 
-Change user data partially.
+Change user's authentication data partially.
 
-"username", "email" and "password" have to contain new validated data.
-
-Fields in "profile" have to look such a way:
+"username", "email" or "password" has to contain new validated data.
 
 ```
 {
-   "profile": {
-      "exclude_ingrs": {
-         "action": "add",
-         "values": [
-             9,
-             41,
-             63
-         ]
-      },
-      "include_ingrs": {
-          "action": "remove",
-          "values": 2214
-      }
-   }
+    "email": "tmariacrezyr@lesscrm.com"
+}
+```
+
+### Favourite products
+
+```
+GET /users/{id}/favourites
+```
+
+Return a list of user's favourite products.
+
+```
+{
+    "favourite_products": [
+        {
+            "id": 102,
+            "name": "Royal Skin Cactus Soothing Gel"
+        },
+        {
+            "id": 167,
+            "name": "Ciracle Pore Control Blackhead Off Sheet"
+        }
+    ]
+}
+```
+
+```
+PATCH /users/{id}/favourites
+```
+
+Change a list of user's favourite products.
+
+```
+{
+    "favourite_products": {
+        "action": "add",
+        "values": 102
+    }
+}
+
+```
+Available actions:
+* "add";
+* "remove".
+
+Values must be IDs as either a list of integers or a single integer.
+
+
+### Ingredients lists
+
+```
+GET /users/{id}/ingrs
+```
+
+Return saved user's lists of ingredients to fill in filters quickly.
+
+```
+{
+    "exclude_ingrs": [
+        {
+            "id": 2664,
+            "name": "Sodium Laureth Sulfate"
+        },
+        {
+            "id": 2757,
+            "name": "Sodium Lauryl Sulfate"
+        }
+    ],
+    "include_ingrs": [
+        {
+            "id": 3003,
+            "name": "Tocopherol"
+        },
+        {
+            "id": 2213,
+            "name": "Cetearyl Alcohol"
+        },
+        {
+            "id": 2214,
+            "name": "Cetyl Alcohol"
+        }
+    ],
+    "exclude_ingrs_groups": null,
+    "include_ingrs_groups": null
+}
+```
+
+```
+PATCH /users/{id}/ingrs
+```
+
+Change user's ingredients lists partially.
+
+```
+{
+    "include_ingrs": {
+        "action": "remove",
+        "values": [2213, 2214]
+    }
 }
 ```
 Available actions:
@@ -332,6 +391,7 @@ Available actions:
 * "remove".
 
 Values must be IDs as either a list of integers or a single integer.
+
 
 ## Pagination
 
