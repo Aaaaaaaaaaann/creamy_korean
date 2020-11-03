@@ -80,7 +80,39 @@ class IngredientsGroupSerializer(DynamicFieldsSerializer):
         model = IngredientsGroup
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'}, 
+        write_only=True
+        )
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']
+
+    def create(self, validated_data):
+        new_user = User(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            )
+        new_user.set_password(validated_data['password'])
+        new_user.save()
+
+        # Create an entry in the related table as well (without data).
+        UserProfile.objects.create(user=new_user)
+
+        return new_user
+        
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        if new_pass := validated_data.get('password', None):
+            instance.set_password(new_pass)
+        instance.save()
+        return instance
+
+
+class UserProfileSerializer(DynamicFieldsSerializer):
     favourite_products = serializers.DictField()
     exclude_ingrs = serializers.DictField()
     include_ingrs = serializers.DictField()
@@ -91,103 +123,69 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['favourite_products', 'exclude_ingrs', 'include_ingrs', 
                   'exclude_ingrs_groups', 'include_ingrs_groups']
-    
-    def get_values(self, field, model):
-        if not field:
-            return
-        output = []
-        for value in field:
-            output.append({
-                'id': value,
-                'name': model.objects.get(pk=value).name
-            })
-        return output
 
     def to_representation(self, instance):
-        output = {
-            'favourite_products': self.get_values(
-                instance.favourite_products, Product),
-            'exclude_ingrs': self.get_values(
-                instance.exclude_ingrs, Ingredient),
-            'include_ingrs': self.get_values(
-                instance.include_ingrs, Ingredient),
-            'exclude_ingrs_groups': self.get_values(
-                instance.exclude_ingrs_groups, IngredientsGroup),
-            'include_ingrs_groups': self.get_values(
-                instance.exclude_ingrs_groups, IngredientsGroup)
-        }
+        output = {}
+
+        # The representation for /users/{id}/favourites.
+        # It this request, 'self.fields' contain only 'favourite_products' field.
+        if 'favourite_products' in self.fields:
+            output['favourite_products'] = ProfileHandler.get_values(
+                instance.profile.favourite_products, Product)
+        
+        # The representation for /users/{id}/ingrs.
+        # In this request, 'self.fields' contain the rest of fields.
+        elif 'exclude_ingrs' in self.fields:
+            output['exclude_ingrs'] = ProfileHandler.get_values(
+                instance.profile.exclude_ingrs, Ingredient)
+        
+            output['include_ingrs'] = ProfileHandler.get_values(
+                instance.profile.include_ingrs, Ingredient)
+
+            output['exclude_ingrs_groups'] = ProfileHandler.get_values(
+                instance.profile.exclude_ingrs_groups, IngredientsGroup)
+
+            output['include_ingrs_groups'] = ProfileHandler.get_values(
+                instance.profile.exclude_ingrs_groups, IngredientsGroup)
+
         return output
-
-
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        style={'input_type': 'password'}, 
-        write_only=True
-        )
-    profile = UserProfileSerializer()
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'password', 'profile']
-
-    def create(self, validated_data):
-        new_user = User(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            )
-        new_user.set_password(validated_data['password'])
-        new_user.save()
-
-        profile_data = validated_data.pop('profile')
-        UserProfile.objects.create(user=new_user, **profile_data)
-
-        return new_user
-        
+    
     def update(self, instance, validated_data):
-        instance.username = validated_data.get('username', instance.username)
-        instance.email = validated_data.get('email', instance.email)
-        if new_pass := validated_data.get('password', None):
-            instance.set_password(new_pass)
-        instance.save()
+        profile = User.objects.get(pk=instance.pk)
 
-        if profile_data := validated_data.get('profile', None):
-            profile = instance.profile
-
-            if favourites_json := profile_data.get('favourite_products', None):
-                ProfileHandler.make_action(
-                    context=favourites_json,
-                    field=profile.favourite_products,
-                    model=Product
-                )
+        if favourites_json := validated_data.get('favourite_products', None):
+            ProfileHandler.make_action(
+                context=favourites_json,
+                field=profile.favourite_products,
+                model=Product
+            )
             
-            if exclude_json := profile_data.get('exclude_ingrs', None):
-                ProfileHandler.make_action(
-                    context=exclude_json,
-                    field=profile.exclude_ingrs,
-                    model=Ingredient
-                )
+        if exclude_json := validated_data.get('exclude_ingrs', None):
+            ProfileHandler.make_action(
+                context=exclude_json,
+                field=profile.exclude_ingrs,
+                model=Ingredient
+            )
 
-            if include_json := profile_data.get('include_ingrs', None):
-                ProfileHandler.make_action(
-                    context=include_json,
-                    field=profile.include_ingrs,
-                    model=Ingredient
-                )
+        if include_json := validated_data.get('include_ingrs', None):
+            ProfileHandler.make_action(
+                context=include_json,
+                field=profile.include_ingrs,
+                model=Ingredient
+            )
             
-            if exclude_groups_json := profile_data.get('exclude_ingrs_groups', None):
-                ProfileHandler.make_action(
-                    context=exclude_groups_json,
-                    field=profile.exclude_ingrs_groups,
-                    model=Ingredient
-                )
+        if exclude_groups_json := validated_data.get('exclude_ingrs_groups', None):
+            ProfileHandler.make_action(
+                context=exclude_groups_json,
+                field=profile.exclude_ingrs_groups,
+                model=Ingredient
+            )
             
-            if include_groups_json := profile_data.get('include_ingrs_groups', None):
-                ProfileHandler.make_action(
-                    context=include_groups_json,
-                    field=profile.include_ingrs_groups,
-                    model=Ingredient
-                )
+        if include_groups_json := validated_data.get('include_ingrs_groups', None):
+            ProfileHandler.make_action(
+                context=include_groups_json,
+                field=profile.include_ingrs_groups,
+                model=Ingredient
+            )
 
-            profile.save()
-        
-        return instance
+        profile.save()
