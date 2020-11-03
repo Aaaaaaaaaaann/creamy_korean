@@ -55,13 +55,14 @@ class PriceSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(DynamicFieldsSerializer):
+    section = serializers.StringRelatedField()
     composition = CompositionSerializer(read_only=True)
-    prices = PriceSerializer(read_only=True)
-    available_in_shops = ProductInShopSerializer(many=True)
+    prices = PriceSerializer(read_only=True, many=True)
+    available_in_shops = ProductInShopSerializer(read_only=True, many=True)
     
     class Meta:
         model = Product
-        fields = ['id', 'name', 'brand', 'volume', 'image', 'section_id', 'composition', 'prices', 'available_in_shops']
+        fields = ['id', 'name', 'brand', 'volume', 'image', 'section', 'composition', 'prices', 'available_in_shops']
 
 
 class IngredientsGroupSerializer(serializers.ModelSerializer):
