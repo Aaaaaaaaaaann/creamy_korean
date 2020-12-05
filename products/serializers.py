@@ -72,17 +72,6 @@ class ProductSerializer(DynamicFieldsSerializer):
                   'composition', 'prices', 'available_in_shops']
 
 
-def get_values(field, model):
-    if not field:
-        return
-    output = []
-    for value in field:
-        output.append({
-            'id': value,
-            'name': model.objects.get(pk=value).name
-        })
-    return output
-
 class IngredientsGroupSerializer(DynamicFieldsSerializer):
     ingredients = serializers.StringRelatedField(many=True)
 
@@ -102,18 +91,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['favourite_products', 'exclude_ingrs', 'include_ingrs', 
                   'exclude_ingrs_groups', 'include_ingrs_groups']
+    
+    def get_values(self, field, model):
+        if not field:
+            return
+        output = []
+        for value in field:
+            output.append({
+                'id': value,
+                'name': model.objects.get(pk=value).name
+            })
+        return output
 
     def to_representation(self, instance):
         output = {
-            'favourite_products': get_values(
+            'favourite_products': self.get_values(
                 instance.favourite_products, Product),
-            'exclude_ingrs': get_values(
+            'exclude_ingrs': self.get_values(
                 instance.exclude_ingrs, Ingredient),
-            'include_ingrs': get_values(
+            'include_ingrs': self.get_values(
                 instance.include_ingrs, Ingredient),
-            'exclude_ingrs_groups': get_values(
+            'exclude_ingrs_groups': self.get_values(
                 instance.exclude_ingrs_groups, IngredientsGroup),
-            'include_ingrs_groups': get_values(
+            'include_ingrs_groups': self.get_values(
                 instance.exclude_ingrs_groups, IngredientsGroup)
         }
         return output
