@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
 from .filters import ProductFilter
-from .models import Product, Section, IngredientsGroup
-from .serializers import ProductSerializer, SectionSerializer, IngredientsGroupSerializer
+from .models import IngredientsGroup, Product, Section, UserProfile
+from .serializers import ProductSerializer, SectionSerializer, \
+    IngredientsGroupSerializer, UserProfileSerializer, UserSerializer
 
 
 class ProductListView(generics.ListAPIView):
@@ -30,6 +32,27 @@ class SectionListView(generics.ListAPIView):
     serializer_class = SectionSerializer
 
 
-class IngredientsGroupView(generics.ListAPIView):
-    serializer_class = IngredientsGroupSerializer
+class IngredientsGroupListView(generics.ListAPIView):
     queryset = IngredientsGroup.objects.all()
+    serializer_class = IngredientsGroupSerializer
+
+    def get_serializer_context(self):
+        """Ruturn all fields except nested ones."""
+        context = super().get_serializer_context()
+        context['fields'] = ['id', 'name']
+        return context
+
+
+class IngredientsGroupDetailView(generics.RetrieveAPIView):
+    queryset = IngredientsGroup.objects.all()
+    serializer_class = IngredientsGroupSerializer
+    
+
+class UserCreateView(generics.CreateAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
+
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()

@@ -26,8 +26,8 @@ class IngredientInline(admin.TabularInline):
 
 @admin.register(IngredientsGroup)
 class IngredientsGroupAdmin(admin.ModelAdmin):
-    list_display = ('groupname',)
-    list_filter = ('groupname',)
+    list_display = ('name',)
+    list_filter = ('name',)
     inlines = (IngredientInline,)
 
 

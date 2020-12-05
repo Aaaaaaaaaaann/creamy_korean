@@ -232,6 +232,107 @@ Return all sections (products categories).
 }
 ```
 
+## Users
+
+```
+POST /users
+```
+
+Create a user.
+
+Required fields:
+* username;
+* email;
+* password.
+
+All data must be validated before making a request (an email seems to be an email, a password was typed twice).
+
+```
+GET /users/{id}
+```
+
+Return user data.
+
+```
+{
+    "id": 3,
+    "username": "testuser1",
+    "email": "znegrosilva87j@amazonshopbuy.com",
+    "profile": {
+        "favourite_products": [
+            {
+                "id": 102,
+                "name": "Royal Skin Cactus Soothing Gel"
+            },
+            {
+                "id": 167,
+                "name": "Ciracle Pore Control Blackhead Off Sheet"
+            }
+        ],
+        "exclude_ingrs": [
+            {
+                "id": 2664,
+                "name": "Sodium Laureth Sulfate"
+            },
+            {
+                "id": 2757,
+                "name": "Sodium Lauryl Sulfate"
+            }
+        ],
+        "include_ingrs": [
+            {
+                "id": 3003,
+                "name": "Tocopherol"
+            },
+            {
+                "id": 2213,
+                "name": "Cetearyl Alcohol"
+            },
+            {
+                "id": 2214,
+                "name": "Cetyl Alcohol"
+            }
+        ],
+        "exclude_ingrs_groups": null,
+        "include_ingrs_groups": null
+    }
+}
+```
+
+```
+PATCH /users/{id}
+```
+
+Change user data partially.
+
+"username", "email" and "password" have to contain new validated data.
+
+Fields in "profile" have to look such a way:
+
+```
+{
+   "profile": {
+      "exclude_ingrs": {
+         "action": "add",
+         "values": [
+             9,
+             41,
+             63
+         ]
+      },
+      "include_ingrs": {
+          "action": "remove",
+          "values": 2214
+      }
+   }
+}
+```
+Available actions:
+* "add";
+* "remove".
+
+Values must be IDs as either a list of integers or a single integer.
+
 ## Pagination
 
 Pagination style implies using limit and offset parameters. Default limit is 20.

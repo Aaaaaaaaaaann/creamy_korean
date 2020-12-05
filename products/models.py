@@ -6,10 +6,15 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     favourite_products = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
     exclude_ingrs = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
     include_ingrs = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
+    exclude_ingrs_groups = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
+    include_ingrs_groups = ArrayField(base_field=models.IntegerField(), blank=True, null=True)
+
+    def __str__(self):
+        return User.objects.get(pk=self.user.pk).username
 
 
 class Section(models.Model):
@@ -79,10 +84,10 @@ class SectionTemp(models.Model):
 
 
 class IngredientsGroup(models.Model):
-    groupname = models.TextField(unique=True)
+    name = models.TextField(unique=True)
 
     def __str__(self):
-        return self.groupname
+        return self.name
 
 
 class Ingredient(models.Model):
