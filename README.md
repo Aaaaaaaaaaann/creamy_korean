@@ -16,6 +16,7 @@ https://creamykorean.ru/v1/api/
 * [Filtering](#filtering)
  
 [Sections](#sections)
+ 
 [Users](#users)
 * [Favourite products](#favourite-products)
 * [Ingredients lists](#ingredients-lists)
