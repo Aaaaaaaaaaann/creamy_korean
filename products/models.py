@@ -97,6 +97,10 @@ class Ingredient(models.Model):
     
     def __str__(self):
         return self.name
+    
+    @property
+    def ingredient_indexing(self):
+        return self.name
 
 
 class Composition(models.Model):

@@ -1,8 +1,17 @@
 from django.contrib.auth.models import User
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework import serializers
 
-from .models import Section, Product, IngredientsGroup, Ingredient, \
-    ProductInShop, Price, UserProfile
+from .documents import IngredientDocument
+from .models import (
+    Section,
+    Product,
+    IngredientsGroup,
+    Ingredient,
+    ProductInShop,
+    Price,
+    UserProfile
+)
 from extras.users import ProfileHandler
 
 
@@ -70,6 +79,13 @@ class ProductSerializer(DynamicFieldsSerializer):
         model = Product
         fields = ['id', 'name', 'brand', 'volume', 'image', 'section', 
                   'composition', 'prices', 'available_in_shops']
+
+
+class IngredientSerializer(DocumentSerializer):
+
+    class Meta:
+        document = IngredientDocument
+        fields = ['id', 'name']
 
 
 class IngredientsGroupSerializer(DynamicFieldsSerializer):

@@ -1,10 +1,19 @@
 from django.contrib.auth.models import User
+from django_elasticsearch_dsl_drf.constants import LOOKUP_FILTER_PREFIX
+from django_elasticsearch_dsl_drf.filter_backends import (
+    CompoundSearchFilterBackend,
+    FilteringFilterBackend
+)
+from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-from .filters import ProductFilter
-from .models import IngredientsGroup, Product, Section, UserProfile
 from . import serializers as app_serializers
+from .documents import IngredientDocument
+from .models import IngredientsGroup, Product, Section
+from .filters import ProductFilter
 
 
 class ProductListView(generics.ListAPIView):
@@ -31,6 +40,21 @@ class SectionListView(generics.ListAPIView):
     serializer_class = app_serializers.SectionSerializer
 
 
+class IngredientFilterView(DocumentViewSet):
+    document = IngredientDocument
+    serializer_class = app_serializers.IngredientSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [CompoundSearchFilterBackend, FilteringFilterBackend]
+    search_fields = ['name']
+    filter_fields = {
+        'name': {
+            'field': 'name',
+            'lookups': [LOOKUP_FILTER_PREFIX]
+            }
+        }
+    ordering = ['name']
+
+
 class IngredientsGroupListView(generics.ListAPIView):
     queryset = IngredientsGroup.objects.all()
     serializer_class = app_serializers.IngredientsGroupSerializer
@@ -45,7 +69,7 @@ class IngredientsGroupListView(generics.ListAPIView):
 class IngredientsGroupDetailView(generics.RetrieveAPIView):
     queryset = IngredientsGroup.objects.all()
     serializer_class = app_serializers.IngredientsGroupSerializer
-    
+
 
 class UserCreateView(generics.CreateAPIView):
     serializer_class = app_serializers.UserSerializer

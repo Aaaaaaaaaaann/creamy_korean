@@ -6,6 +6,7 @@ urlpatterns = [
     path('products/', views.ProductListView.as_view(), name='products_list'),
     path('products/<int:pk>/', views.ProductDetailView.as_view(), name='product_detail'),
     path('sections/', views.SectionListView.as_view(), name='sections_list'),
+    path('ingrs/', views.IngredientFilterView.as_view({'get': 'list'}), name='search_ingrs'),
     path('ingrs-groups/', views.IngredientsGroupListView.as_view(), name='ingrs_groups'),
     path('ingrs-groups/<int:pk>/', views.IngredientsGroupDetailView.as_view(), name='ingrs_groups_detail'),
     path('users/', views.UserCreateView.as_view(), name='user_create'),
