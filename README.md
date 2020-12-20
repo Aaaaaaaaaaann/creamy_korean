@@ -253,7 +253,7 @@ Return all sections (products categories).
 
 ## Ingredients
 
-This section consists of two recourses: ingredients and ingredients groups. An ingredient is an entry on a definite matter, and a group represents several qauivalent ingredients (and different names given them by cosmetic manufacturers). For example, vitamin E is a group of matters, and, for filtering, a user may choose a separate ingredient (tocopherol) or a group "vitamin E" which includes all (or most of them) possible ingredients: tocopherol, tocopheryl acetate, tocopheryl linoleate, vitamin E and so on.
+This section consists of two recourses: ingredients and ingredients groups. An ingredient is an entry on a definite matter, and a group represents several eqauivalent ingredients (and different names given to them by cosmetic manufacturers). For example, vitamin E is a group of matters, and, for filtering, a user may choose a separate ingredient (tocopherol) or a group "vitamin E" which includes all (or most of them) possible ingredients: tocopherol, tocopheryl acetate, tocopheryl linoleate, vitamin E and so on.
 
 ```
 GET /ingrs
@@ -310,7 +310,7 @@ Return ingredients that contain the word "cannabis" (as a separate word, not as 
 GET ingrs/?name__prefix=cann
 ```
 
-Return ingredients that contain words with the prefix "cann" (even if such a word at the end of a name).
+Return ingredients that contain words with the prefix "cann" (even if such a word is at the end of a name).
 
 ```
 {
