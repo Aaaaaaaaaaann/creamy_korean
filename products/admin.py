@@ -18,6 +18,13 @@ class SectionAdmin(admin.ModelAdmin):
     list_display_links = ('name',)
 
 
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'group')
+    list_filter = ('group',)
+    ordering = ('name',)
+
+
 class IngredientInline(admin.TabularInline):
     model = Ingredient
     fields = ('name', 'group')

@@ -86,6 +86,9 @@ class SectionTemp(models.Model):
 class IngredientsGroup(models.Model):
     name = models.TextField(unique=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return self.name
 
@@ -95,12 +98,18 @@ class Ingredient(models.Model):
     group = models.ForeignKey(IngredientsGroup, on_delete=models.DO_NOTHING, blank=True, null=True,
                               related_name='ingredients')
     
+    class Meta:
+        ordering = ['name']
+    
     def __str__(self):
         return self.name
     
     @property
     def ingredient_indexing(self):
-        return self.name
+        return {
+            'id': self.pk,
+            'name': self.name
+        }
 
 
 class Composition(models.Model):

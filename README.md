@@ -16,6 +16,10 @@ https://creamykorean.ru/v1/api/
 * [Filtering](#filtering)
  
 [Sections](#sections)
+
+[Ingredients](#ingredients)
+* [Filtering of ingredients](#filtering-of-ingredients)
+* [Groups of ingredients](#groups-of-ingredients)
  
 [Users](#users)
 * [Favourite products](#favourite-products)
@@ -245,6 +249,160 @@ Return all sections (products categories).
     ]
 }
 ```
+
+
+## Ingredients
+
+This section consists of two recourses: ingredients and ingredients groups. An ingredient is an entry on a definite matter, and a group represents several qauivalent ingredients (and different names given them by cosmetic manufacturers). For example, vitamin E is a group of matters, and, for filtering, a user may choose a separate ingredient (tocopherol) or a group "vitamin E" which includes all (or most of them) possible ingredients: tocopherol, tocopheryl acetate, tocopheryl linoleate, vitamin E and so on.
+
+```
+GET /ingrs
+```
+
+Ruturn all entries on ingredients (> 3 000).
+
+### Filtering of ingredients
+
+Ingredients can be filtered by "name" filed.
+
+```
+GET /ingrs/?name=cannabis
+```
+
+Return ingredients that contain the word "cannabis" (as a separate word, not as a part of another one).
+
+```
+{
+    "count": 6,
+    "next": null,
+    "previous": null,
+    "facets": {},
+    "results": [
+        {
+            "id": 4161,
+            "name": "Cannabis Sativa"
+        },
+        {
+            "id": 4157,
+            "name": "Cannabis Sativa Flower Extract"
+        },
+        {
+            "id": 4158,
+            "name": "Cannabis Sativa Seedcake Powder"
+        },
+        {
+            "id": 4154,
+            "name": "Cannabis Sativa Seed Oil"
+        },
+        {
+            "id": 4155,
+            "name": "Cannabis Sativa Seed Water"
+        },
+        {
+            "id": 4162,
+            "name": "Stearyl Cannabis Seedate"
+        }
+    ]
+}
+```
+
+```
+GET ingrs/?name__prefix=cann
+```
+
+Return ingredients that contain words with the prefix "cann" (even if such a word at the end of a name).
+
+```
+{
+    "count": 10,
+    "next": null,
+    "previous": null,
+    "facets": {},
+    "results": [
+        {
+            "id": 4156,
+            "name": "Cannabidiol"
+        },
+        {
+            "id": 4160,
+            "name": "Cannabigerol"
+        },
+        {
+            "id": 4159,
+            "name": "Cannabinol"
+        },
+        ...
+        {
+            "id": 4162,
+            "name": "Stearyl Cannabis Seedate"
+        }
+    ]
+}
+```
+
+### Groups of ingredients
+
+```
+GET /ingrs-groups
+```
+
+Return a list of all ingredients groups.
+
+```{
+    "count": 20,
+    "next": null,
+    "previous": null,
+    "results": [
+        ...
+        {
+            "id": 1,
+            "name": "жирные спирты"
+        },
+        {
+            "id": 9,
+            "name": "микропластики"
+        },
+        {
+            "id": 3,
+            "name": "минеральные масла"
+        },
+        {
+            "id": 2,
+            "name": "простые спирты"
+        },
+        {
+            "id": 6,
+            "name": "силиконы"
+        }
+    ]
+}
+```
+
+```
+GET /ingrs-groups/{id}
+```
+
+Return a list of ingredients in the group.
+
+```
+{
+    "id": 1,
+    "name": "жирные спирты",
+    "ingredients": [
+        "Behenyl Alcohol",
+        "Caprylic Alcohol",
+        "Cetearyl Alcohol",
+        "Cetyl Alcohol",
+        "Decyl Alcohol",
+        "Isostearyl Alcohol",
+        "Lauryl Alcohol",
+        "Myristyl Alcohol",
+        "Oleyl Alcohol",
+        "Stearyl Alcohol"
+    ]
+}
+```
+
 
 ## Users
 

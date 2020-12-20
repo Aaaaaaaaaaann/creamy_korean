@@ -24,6 +24,8 @@ html_strip = analyzer(
 @INDEX.doc_type
 class IngredientDocument(Document):
 
+    id = fields.IntegerField()
+
     name = fields.TextField(
         analyzer=html_strip,
         fields={
