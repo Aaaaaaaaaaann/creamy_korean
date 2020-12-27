@@ -7,7 +7,7 @@ This is a training project, so none of the further URLs are actually available.
 ## Base URL
 
 ```
-https://creamykorean.ru/v1/api/
+https://creamykorean.ru//api/v1/
 ```
 
 ## Content

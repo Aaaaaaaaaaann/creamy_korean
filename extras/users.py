@@ -25,20 +25,20 @@ class ProfileHandler:
     
 
     @staticmethod
-    def make_action(context, field, model):
+    def make_action(data):
         """
         Change values in database field array
         based on request context.
         """
-        action = context['action']
-        values = context['values']
+        action = data['action']
+        values = data['values']
 
         if not isinstance(values, list):
             values = [values]
 
         if action == 'add':
-            values = ProfileHandler.existing(model, set(values))
-            if field is None:
+            values = ProfileHandler.existing(data['model'], set(values))
+            if (field := data['field']) is None:
                 field = values
             else:
                 for value in values:
@@ -46,7 +46,7 @@ class ProfileHandler:
                         field.append(value)
                 
         elif action == 'remove':
-            if field is None:
+            if (field := data['field']) is None:
                 return
             for value in values:
                 try:

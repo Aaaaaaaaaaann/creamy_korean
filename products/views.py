@@ -6,9 +6,9 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 )
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 from . import serializers as app_serializers
 from .documents import IngredientDocument
@@ -79,11 +79,13 @@ class UserCreateView(generics.CreateAPIView):
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = app_serializers.UserSerializer
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
 
 
 class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = app_serializers.UserProfileSerializer
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

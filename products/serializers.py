@@ -89,11 +89,11 @@ class IngredientSerializer(DocumentSerializer):
 
 
 class IngredientsGroupSerializer(DynamicFieldsSerializer):
-    ingredients = serializers.StringRelatedField(many=True)
+    ingredients = IngredientSerializer(read_only=True, many=True)
 
     class Meta:
-        fields = ['id', 'name', 'ingredients']
         model = IngredientsGroup
+        fields = ['id', 'name', 'ingredients']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -144,7 +144,7 @@ class UserProfileSerializer(DynamicFieldsSerializer):
         output = {}
 
         # The representation for /users/{id}/favourites.
-        # It this request, 'self.fields' contain only 'favourite_products' field.
+        # In this request, 'self.fields' contain only 'favourite_products' field.
         if 'favourite_products' in self.fields:
             output['favourite_products'] = ProfileHandler.get_values(
                 instance.profile.favourite_products, Product)
@@ -167,41 +167,34 @@ class UserProfileSerializer(DynamicFieldsSerializer):
         return output
     
     def update(self, instance, validated_data):
-        profile = User.objects.get(pk=instance.pk)
+        profile = UserProfile.objects.get(user=instance.pk)
 
-        if favourites_json := validated_data.get('favourite_products', None):
-            ProfileHandler.make_action(
-                context=favourites_json,
-                field=profile.favourite_products,
-                model=Product
-            )
-            
-        if exclude_json := validated_data.get('exclude_ingrs', None):
-            ProfileHandler.make_action(
-                context=exclude_json,
-                field=profile.exclude_ingrs,
-                model=Ingredient
-            )
+        fileds = {
+            'favourite_products': {
+                'field': profile.favourite_products,
+                'model': Product
+            },
+            'exclude_ingrs': {
+                'field': profile.exclude_ingrs,
+                'model': Ingredient
+            },
+            'include_ingrs': {
+                'field': profile.exclude_ingrs,
+                'model': Ingredient
+            },
+            'exclude_ingrs_groups': {
+                'field': profile.exclude_ingrs_groups,
+                'model': Ingredient
+            },
+            'include_ingrs_groups': {
+                'field': profile.include_ingrs_groups,
+                'model': Ingredient
+            }
+        }
 
-        if include_json := validated_data.get('include_ingrs', None):
-            ProfileHandler.make_action(
-                context=include_json,
-                field=profile.include_ingrs,
-                model=Ingredient
-            )
-            
-        if exclude_groups_json := validated_data.get('exclude_ingrs_groups', None):
-            ProfileHandler.make_action(
-                context=exclude_groups_json,
-                field=profile.exclude_ingrs_groups,
-                model=Ingredient
-            )
-            
-        if include_groups_json := validated_data.get('include_ingrs_groups', None):
-            ProfileHandler.make_action(
-                context=include_groups_json,
-                field=profile.include_ingrs_groups,
-                model=Ingredient
-            )
+        for field, data in validated_data.items():
+            data |= fileds[field]
+            ProfileHandler.make_action(data)
 
         profile.save()
+        return instance

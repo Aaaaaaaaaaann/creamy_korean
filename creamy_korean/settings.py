@@ -39,11 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Ours
     'products.apps.ProductsConfig',
+
+    # Third-party
     'rest_framework',
     'django_filters',
     'django_elasticsearch_dsl',
     'django_elasticsearch_dsl_drf',
+    'rest_framework.authtoken',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
